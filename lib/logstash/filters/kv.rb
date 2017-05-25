@@ -371,6 +371,17 @@ class LogStash::Filters::KV < LogStash::Filters::Base
       value = @remove_char_value ? value.gsub(@remove_char_value_re, "") : value
       value = @transform_value ? transform(value, @transform_value) : value
 
+      # If value is a floating point number 
+      if value =~ /^[0-9]+\.[0-9]+?$/
+	value = Float(value)
+      elsif value =~ /^[0-9]+$/
+	value = Integer(value)
+      elsif value == 'true'
+	value = true
+      elsif value == 'false'
+      	value = false	      
+      end
+
       # Bail out if inserting duplicate value in key mapping when unique_values
       # option is set to true.
       next if not @allow_duplicate_values and kv_keys.has_key?(key) and kv_keys[key].include?(value)
